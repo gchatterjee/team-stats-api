@@ -41,11 +41,9 @@ const assembleDocument = async (
   const event = recentEvents.items.find((item) => item.eventCode === eventCode);
   const results = await nyrrClient.getTeamRunners(eventCode, TEAM_CODE);
   const awards = await nyrrClient.getAllRaceAwardRunners(eventCode, TEAM_CODE);
-  const runners = Object.fromEntries(
-    await Promise.all(
-      results.items.map(async ({ runnerId }) =>
-        getAugmentedRunner(nyrrClient, `${runnerId}`, teamCode),
-      ),
+  const runners = await Promise.all(
+    results.items.map(async ({ runnerId }) =>
+      getAugmentedRunner(nyrrClient, `${runnerId}`, teamCode),
     ),
   );
 
