@@ -139,7 +139,7 @@ export default class {
   }
 
   async getRunnerRaces(
-    runnerId: string,
+    runnerId: number,
     teamCode?: string,
   ): Promise<ApiResponse<RunnerRace>> {
     try {

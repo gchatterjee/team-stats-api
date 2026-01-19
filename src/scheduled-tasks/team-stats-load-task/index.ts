@@ -18,9 +18,12 @@ const JSON_EXTENSION = ".json";
 
 const getAugmentedRunner = async (
   nyrrClient: NyrrClient,
-  runnerId: string,
+  runnerId: number,
   teamCode: string,
-): Promise<(RunnerRace | { teamCode: string | null })[]> => {
+): Promise<{
+  runnerId: number;
+  races: (RunnerRace | { teamCode: string | null })[];
+}> => {
   const [allRaces, teamRaces] = await Promise.all([
     nyrrClient.getRunnerRaces(runnerId),
     nyrrClient.getRunnerRaces(runnerId, teamCode),
@@ -28,10 +31,13 @@ const getAugmentedRunner = async (
   const teamEventCodes = new Set(
     teamRaces.items.map(({ eventCode }) => eventCode),
   );
-  return allRaces.items.map((event) => ({
-    ...event,
-    teamCode: teamEventCodes.has(event.eventCode) ? teamCode : null,
-  }));
+  return {
+    runnerId,
+    races: allRaces.items.map((event) => ({
+      ...event,
+      teamCode: teamEventCodes.has(event.eventCode) ? teamCode : null,
+    })),
+  };
 };
 
 const assembleDocument = async (
@@ -48,8 +54,7 @@ const assembleDocument = async (
       ({ runnerId }, i) =>
         new Promise((resolve) => {
           setTimeout(
-            () =>
-              resolve(getAugmentedRunner(nyrrClient, `${runnerId}`, teamCode)),
+            () => resolve(getAugmentedRunner(nyrrClient, runnerId, teamCode)),
             i * DELAY_INCREMENT_MS,
           );
         }),
