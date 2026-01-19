@@ -24,7 +24,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: !Sub "${PublicBucket.Arn}/*
+            Resource: !Sub "${PublicBucket.Arn}/*"
   TeamStatsLoadTask:
     Type: AWS::Serverless::Function
     Properties:

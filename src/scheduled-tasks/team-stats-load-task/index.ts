@@ -74,7 +74,7 @@ export const handler = async (): Promise<void> => {
       newEventCodes.push(code);
   });
 
-  let [newEventCode] = newEventCodes;
+  const [newEventCode] = newEventCodes;
 
   if (newEventCode === undefined) {
     console.log("no new events found. exiting.");
