@@ -24,7 +24,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: !Sub "${PublicBucket.Arn}/*"
+            Resource: !Sub "${TeamStats.Arn}/*"
   TeamStatsLoadTask:
     Type: AWS::Serverless::Function
     Properties:
@@ -38,7 +38,7 @@ Resources:
         TeamStatsLoadSchedule:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: cron(30 2 * * * *)
+            ScheduleExpression: cron(0/20 * * * ? *)
       MemorySize: 3008
       Timeout: 30
       Tracing: Active
@@ -78,6 +78,7 @@ Resources:
   TeamStatsLoadTaskLogGroup:
     Type: AWS::Logs::LogGroup
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       LogGroupName: !Sub /aws/lambda/${TeamStatsLoadTask}
 Transform: AWS::Serverless-2016-10-31
