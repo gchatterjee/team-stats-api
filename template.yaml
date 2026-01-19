@@ -31,8 +31,8 @@ Resources:
       Description: !Sub
         - Stack ${AWS::StackName} Function ${ResourceName}
         - ResourceName: TeamStatsLoadTask
-      CodeUri: dist/scheduled-tasks/team-stats-load-task
-      Handler: index.handler
+      CodeUri: .
+      Handler: dist/scheduled-tasks/team-stats-load-task/index.handler
       Runtime: nodejs22.x
       Events:
         TeamStatsLoadSchedule:
