@@ -28,6 +28,7 @@ export const withPagination = async <T, D>(
   ).data;
   const pageCount = Math.ceil(result.totalItems / PAGE_SIZE);
   console.log(`got page 1 of ${pageCount}!`, { url, data });
+  if (pageCount === 0) return result; // this will only happen if there are no items
   await Promise.all(
     [...new Array(pageCount - 1)].map(async (_, i) => {
       const pageIndex = i + 2;
