@@ -20,10 +20,7 @@ const getAugmentedRunner = async (
   nyrrClient: NyrrClient,
   runnerId: number,
   teamCode: string,
-): Promise<{
-  runnerId: number;
-  races: (RunnerRace | { teamCode: string | null })[];
-}> => {
+): Promise<(RunnerRace | { teamCode: string | null })[]> => {
   const [allRaces, teamRaces] = await Promise.all([
     nyrrClient.getRunnerRaces(runnerId),
     nyrrClient.getRunnerRaces(runnerId, teamCode),
@@ -31,13 +28,10 @@ const getAugmentedRunner = async (
   const teamEventCodes = new Set(
     teamRaces.items.map(({ eventCode }) => eventCode),
   );
-  return {
-    runnerId,
-    races: allRaces.items.map((event) => ({
-      ...event,
-      teamCode: teamEventCodes.has(event.eventCode) ? teamCode : null,
-    })),
-  };
+  return allRaces.items.map((event) => ({
+    ...event,
+    teamCode: teamEventCodes.has(event.eventCode) ? teamCode : null,
+  }));
 };
 
 const assembleDocument = async (
@@ -49,14 +43,20 @@ const assembleDocument = async (
   const event = recentEvents.items.find((item) => item.eventCode === eventCode);
   const results = await nyrrClient.getTeamRunners(eventCode, TEAM_CODE);
   const awards = await nyrrClient.getAllRaceAwardRunners(eventCode, TEAM_CODE);
-  const runners = await Promise.all(
+  const runners: Record<number, (RunnerRace | { teamCode: string | null })[]> =
+    {};
+  await Promise.all(
     results.items.map(
       ({ runnerId }, i) =>
-        new Promise((resolve) => {
-          setTimeout(
-            () => resolve(getAugmentedRunner(nyrrClient, runnerId, teamCode)),
-            i * DELAY_INCREMENT_MS,
-          );
+        new Promise<void>((resolve) => {
+          setTimeout(async () => {
+            runners[runnerId] = await getAugmentedRunner(
+              nyrrClient,
+              runnerId,
+              teamCode,
+            );
+            resolve();
+          }, i * DELAY_INCREMENT_MS);
         }),
     ),
   );
