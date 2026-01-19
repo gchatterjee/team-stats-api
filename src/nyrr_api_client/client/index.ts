@@ -11,11 +11,14 @@ import {
 
 export const GENDERS = [Gender.Women, Gender.NonBinary, Gender.Men];
 export const PAGE_SIZE = 100;
+export const MAX_CONCURRENT_REQUESTS = 5;
+export const DELAY_INCREMENT_MS = 250;
 
 export const withPagination = async <T, D>(
   url: string,
   data: D,
 ): Promise<ApiResponse<T>> => {
+  console.log("getting page 1...", { url, data });
   const result: ApiResponse<T> = (
     await instance.post(url, {
       ...data,
@@ -24,16 +27,24 @@ export const withPagination = async <T, D>(
     })
   ).data;
   const pageCount = Math.ceil(result.totalItems / PAGE_SIZE);
+  console.log(`got page 1 of ${pageCount}!`, { url, data });
   await Promise.all(
     [...new Array(pageCount - 1)].map(async (_, i) => {
       const pageIndex = i + 2;
-      const response: ApiResponse<T> = (
-        await instance.post(url, {
-          ...data,
-          pageIndex,
-          pageSize: PAGE_SIZE,
-        })
-      ).data;
+      const delay = (i % MAX_CONCURRENT_REQUESTS) * DELAY_INCREMENT_MS;
+      const response: ApiResponse<T> = await new Promise((resolve) => {
+        const body = { ...data, pageIndex, pageSize: PAGE_SIZE };
+        setTimeout(async () => {
+          console.log(`getting page ${pageIndex} of ${pageCount}...`, {
+            url,
+            body,
+          });
+          const response: ApiResponse<T> = (await instance.post(url, body))
+            .data;
+          console.log(`got page ${pageIndex} of ${pageCount}!`, { url, body });
+          resolve(response);
+        }, delay);
+      });
       result.items.push(...response.items);
     }),
   );
@@ -43,9 +54,11 @@ export const withPagination = async <T, D>(
 export default class {
   async getRecentEvents(): Promise<ApiResponse<Event>> {
     try {
+      console.log("getting recent events...");
       const response = await instance.post("/events/search", {
         sortColumn: "StartDateTime",
       });
+      console.log("got recent events!");
       return response.data;
     } catch (error) {
       console.error("error retrieving recent events", error);
