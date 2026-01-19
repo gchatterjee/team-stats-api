@@ -1,5 +1,7 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import NyrrClient from "../../nyrr_api_client/client/index.js";
+import NyrrClient, {
+  DELAY_INCREMENT_MS,
+} from "../../nyrr_api_client/client/index.js";
 import { listObjects } from "../../s3_utils/list-objects.js";
 import type {
   ApiResponse,
@@ -42,8 +44,15 @@ const assembleDocument = async (
   const results = await nyrrClient.getTeamRunners(eventCode, TEAM_CODE);
   const awards = await nyrrClient.getAllRaceAwardRunners(eventCode, TEAM_CODE);
   const runners = await Promise.all(
-    results.items.map(async ({ runnerId }) =>
-      getAugmentedRunner(nyrrClient, `${runnerId}`, teamCode),
+    results.items.map(
+      ({ runnerId }, i) =>
+        new Promise((resolve) => {
+          setTimeout(
+            () =>
+              resolve(getAugmentedRunner(nyrrClient, `${runnerId}`, teamCode)),
+            i * DELAY_INCREMENT_MS,
+          );
+        }),
     ),
   );
 
