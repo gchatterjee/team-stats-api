@@ -40,7 +40,7 @@ Resources:
           Properties:
             ScheduleExpression: cron(0/20 * * * ? *)
       MemorySize: 3008
-      Timeout: 30
+      Timeout: 900
       Tracing: Active
       Environment:
         Variables:
