@@ -1,11 +1,14 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import NyrrClient from "../../nyrr_api_client/client/index.js";
+import NyrrClient, {
+  DELAY_INCREMENT_MS,
+} from "../../nyrr_api_client/client/index.js";
 import { listObjects } from "../../s3_utils/list-objects.js";
 import type {
   ApiResponse,
   Event,
   RunnerRace,
 } from "../../nyrr_api_client/types.js";
+import { promiseAllDelayed } from "../../utils.js";
 
 const s3Client = new S3Client({});
 const BUCKET_NAME = `${process.env.TEAMSTATS_BUCKET_NAME}`;
@@ -43,15 +46,17 @@ const assembleDocument = async (
   const awards = await nyrrClient.getAllRaceAwardRunners(eventCode, TEAM_CODE);
   const runners: Record<number, (RunnerRace | { teamCode: string | null })[]> =
     {};
-  await Promise.all(
+  await promiseAllDelayed(
     results.items.map(
-      async ({ runnerId }) =>
-        (runners[runnerId] = await getAugmentedRunner(
-          nyrrClient,
-          runnerId,
-          teamCode,
-        )),
+      ({ runnerId }) =>
+        async () =>
+          (runners[runnerId] = await getAugmentedRunner(
+            nyrrClient,
+            runnerId,
+            teamCode,
+          )),
     ),
+    DELAY_INCREMENT_MS,
   );
 
   return { eventCode, document: { event, results, awards, runners } };

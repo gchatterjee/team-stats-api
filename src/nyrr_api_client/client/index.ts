@@ -1,3 +1,4 @@
+import { promiseAllDelayed } from "../../utils.js";
 import instance from "../instance/index.js";
 import {
   Gender,
@@ -29,8 +30,8 @@ export const withPagination = async <T, D>(
   const pageCount = Math.ceil(result.totalItems / PAGE_SIZE);
   console.log(`got page 1 of ${pageCount}!`, { url, data });
   if (pageCount === 0) return result; // this will only happen if there are no items
-  await Promise.all(
-    [...new Array(pageCount - 1)].map(async (_, i) => {
+  await promiseAllDelayed(
+    [...new Array(pageCount - 1)].map((_, i) => async () => {
       const pageIndex = i + 2;
       const body = { ...data, pageIndex, pageSize: PAGE_SIZE };
       console.log(`getting page ${pageIndex} of ${pageCount}...`, {
@@ -41,6 +42,7 @@ export const withPagination = async <T, D>(
       console.log(`got page ${pageIndex} of ${pageCount}!`, { url, body });
       result.items.push(...response.items);
     }),
+    DELAY_INCREMENT_MS,
   );
   return result;
 };
