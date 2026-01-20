@@ -15,6 +15,6 @@ export default defineConfig([
   { files: ["**/*.js"], languageOptions: { sourceType: "commonjs" } },
   tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", ".aws-sam"]),
   prettier,
 ]);
