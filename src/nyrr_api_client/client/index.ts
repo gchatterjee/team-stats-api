@@ -32,20 +32,13 @@ export const withPagination = async <T, D>(
   await Promise.all(
     [...new Array(pageCount - 1)].map(async (_, i) => {
       const pageIndex = i + 2;
-      const delay = (i % MAX_CONCURRENT_REQUESTS) * DELAY_INCREMENT_MS;
-      const response: ApiResponse<T> = await new Promise((resolve) => {
-        const body = { ...data, pageIndex, pageSize: PAGE_SIZE };
-        setTimeout(async () => {
-          console.log(`getting page ${pageIndex} of ${pageCount}...`, {
-            url,
-            body,
-          });
-          const response: ApiResponse<T> = (await instance.post(url, body))
-            .data;
-          console.log(`got page ${pageIndex} of ${pageCount}!`, { url, body });
-          resolve(response);
-        }, delay);
+      const body = { ...data, pageIndex, pageSize: PAGE_SIZE };
+      console.log(`getting page ${pageIndex} of ${pageCount}...`, {
+        url,
+        body,
       });
+      const response: ApiResponse<T> = (await instance.post(url, body)).data;
+      console.log(`got page ${pageIndex} of ${pageCount}!`, { url, body });
       result.items.push(...response.items);
     }),
   );
