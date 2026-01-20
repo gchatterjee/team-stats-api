@@ -1,4 +1,4 @@
-import { promiseAllDelayed } from "../../utils.js";
+import { DELAY_INCREMENT_MS, promiseAllDelayed } from "../../utils.js";
 import instance from "../instance/index.js";
 import {
   Gender,
@@ -12,8 +12,6 @@ import {
 
 export const GENDERS = [Gender.Women, Gender.NonBinary, Gender.Men];
 export const PAGE_SIZE = 100;
-export const MAX_CONCURRENT_REQUESTS = 5;
-export const DELAY_INCREMENT_MS = 250;
 
 export const withPagination = async <T, D>(
   url: string,

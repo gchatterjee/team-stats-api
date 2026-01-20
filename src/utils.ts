@@ -1,3 +1,5 @@
+export const DELAY_INCREMENT_MS = 500;
+
 export const withDelay = async <T>(
   fn: () => Promise<T>,
   delayMs: number,
