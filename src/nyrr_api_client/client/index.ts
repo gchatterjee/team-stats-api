@@ -49,11 +49,12 @@ export default class {
   async getRecentEvents(): Promise<ApiResponse<Event>> {
     try {
       console.log("getting recent events...");
-      const response = await instance.post("/events/search", {
-        sortColumn: "StartDateTime",
-      });
+      const response: ApiResponse<Event> = await withPagination(
+        "/events/search",
+        { sortColumn: "StartDateTime" },
+      );
       console.log("got recent events!");
-      return response.data;
+      return response;
     } catch (error) {
       console.error("error retrieving recent events", error);
       throw error;
