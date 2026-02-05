@@ -7,12 +7,10 @@ import NyrrClient from "../../nyrr_api_client/client/index.js";
 import { listObjects } from "../../s3_utils/list-objects.js";
 import type {
   ApiResponse,
+  AugmentedRunnerRace,
+  Document,
   Event,
-  RunnerRace,
-  TeamAward,
-  TeamAwardRunner,
-  TeamRunner,
-} from "../../nyrr_api_client/types.js";
+} from "../../types.js";
 import { DELAY_INCREMENT_MS, promiseAllDelayed } from "../../utils.js";
 import { getObject } from "../../s3_utils/get-object.js";
 
@@ -25,20 +23,6 @@ const JSON_EXTENSION = ".json";
 const IN_PROGRESS_EXTENSION = ".temp.json";
 
 const MAX_RUNNERS = 80;
-
-export type AugmentedRunnerRace = RunnerRace & {
-  teamCode: string | null;
-};
-
-export type Document = {
-  eventCode: string;
-  document: {
-    event: Event;
-    results: ApiResponse<TeamRunner>;
-    awards: (TeamAward | { runners: TeamAwardRunner[] })[];
-    runners: Record<number, AugmentedRunnerRace[]>;
-  };
-};
 
 const getAugmentedRunner = async (
   nyrrClient: NyrrClient,

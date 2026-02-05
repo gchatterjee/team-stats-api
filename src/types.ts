@@ -101,3 +101,17 @@ export interface RunnerRace {
   startDateTime: string;
   venue: string;
 }
+
+export type AugmentedRunnerRace = RunnerRace & {
+  teamCode: string | null;
+};
+
+export type Document = {
+  eventCode: string;
+  document: {
+    event: Event;
+    results: ApiResponse<TeamRunner>;
+    awards: (TeamAward | { runners: TeamAwardRunner[] })[];
+    runners: Record<number, AugmentedRunnerRace[]>;
+  };
+};

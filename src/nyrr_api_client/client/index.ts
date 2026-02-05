@@ -8,7 +8,7 @@ import {
   type TeamAward,
   type TeamAwardRunner,
   type TeamRunner,
-} from "../types.js";
+} from "../../types.js";
 
 export const GENDERS = [Gender.Women, Gender.NonBinary, Gender.Men];
 export const PAGE_SIZE = 100;
@@ -17,16 +17,11 @@ export const withPagination = async <T, D>(
   url: string,
   data: D,
 ): Promise<ApiResponse<T>> => {
-  console.log("getting page 1...", { url, data });
-  const result: ApiResponse<T> = (
-    await instance.post(url, {
-      ...data,
-      pageIndex: 1,
-      pageSize: PAGE_SIZE,
-    })
-  ).data;
+  const body = { ...data, pageIndex: 1, pageSize: PAGE_SIZE };
+  console.log("getting page 1...", { url, data, pageSize: PAGE_SIZE });
+  const result: ApiResponse<T> = (await instance.post(url, body)).data;
   const pageCount = Math.ceil(result.totalItems / PAGE_SIZE);
-  console.log(`got page 1 of ${pageCount}!`, { url, data });
+  console.log(`got page 1 of ${pageCount}!`, { url, body });
   if (pageCount === 0) return result; // this will only happen if there are no items
   await promiseAllDelayed(
     [...new Array(pageCount - 1)].map((_, i) => async () => {
@@ -66,10 +61,11 @@ export default class {
     teamCode: string,
   ): Promise<ApiResponse<TeamRunner>> {
     try {
-      return await withPagination("/teams/teamRunners", {
-        eventCode,
-        teamCode,
-      });
+      const body = { eventCode, teamCode };
+      console.log("getting team runners...", { body });
+      const response = await instance.post("/teams/teamRunners", body);
+      console.log("got team runners!");
+      return response.data;
     } catch (error) {
       console.error("error retrieving results", { eventCode, teamCode }, error);
       throw error;
